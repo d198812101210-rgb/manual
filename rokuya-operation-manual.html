@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROKUYA 運用マニュアル</title>
+<style>
+  :root {
+    --ink: #1c1c1c;
+    --ink-soft: #3a3632;
+    --muted: #6b6258;
+    --line: #e3dccf;
+    --line-strong: #cfc4b2;
+    --paper: #faf8f3;
+    --shiro: #ffffff;
+    --sand: #efe9dd;
+    --sand-deep: #e6ddcb;
+    --sabi: #9e4a37;      /* 錆朱 vermilion accent */
+    --kin: #a9884c;       /* 金 gold */
+    --serif: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", Georgia, serif;
+    --sans: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.85;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .layout { display: flex; align-items: flex-start; max-width: 1200px; margin: 0 auto; }
+
+  /* ---------- Sidebar / TOC ---------- */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    width: 280px;
+    flex: 0 0 280px;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 40px 24px 40px 32px;
+    border-right: 1px solid var(--line);
+    background: var(--sand);
+  }
+  .sidebar .brand {
+    font-family: var(--serif);
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    margin: 0 0 4px;
+  }
+  .sidebar .brand-sub {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+  .toc { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  .toc li { margin: 0; }
+  .toc a {
+    display: block;
+    padding: 7px 10px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 13.5px;
+    border-left: 2px solid transparent;
+    transition: all .2s ease;
+  }
+  .toc a:hover { color: var(--sabi); background: rgba(158,74,55,.06); }
+  .toc a.active {
+    color: var(--sabi);
+    border-left-color: var(--sabi);
+    background: rgba(158,74,55,.08);
+    font-weight: 600;
+  }
+  .toc a .num {
+    display: inline-block;
+    width: 1.6em;
+    color: var(--kin);
+    font-family: var(--serif);
+  }
+
+  /* ---------- Content ---------- */
+  .content {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 56px 56px 120px;
+  }
+
+  header.doc-head {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 28px;
+    margin-bottom: 16px;
+  }
+  header.doc-head .eyebrow {
+    font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--sabi); margin: 0 0 14px;
+  }
+  header.doc-head h1 {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin: 0 0 10px;
+    line-height: 1.25;
+  }
+  header.doc-head p.lead { color: var(--muted); margin: 0; max-width: 60ch; }
+  .meta-row { margin-top: 18px; font-size: 12.5px; color: var(--muted); display: flex; gap: 24px; flex-wrap: wrap; }
+
+  section.block {
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0 8px;
+  }
+  section.block > .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    cursor: pointer;
+    user-select: none;
+    padding: 20px 0;
+    margin: 0;
+  }
+  section.block > .sec-head .sec-num {
+    font-family: var(--serif);
+    color: var(--kin);
+    font-size: 20px;
+    flex: 0 0 auto;
+    min-width: 1.4em;
+  }
+  section.block > .sec-head h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 25px;
+    margin: 0;
+    flex: 1 1 auto;
+    letter-spacing: 0.02em;
+  }
+  section.block > .sec-head .chev {
+    flex: 0 0 auto; color: var(--muted); transition: transform .25s ease; font-size: 14px;
+  }
+  section.block.collapsed > .sec-head .chev { transform: rotate(-90deg); }
+  section.block > .sec-body { padding: 0 0 24px 0; }
+  section.block.collapsed > .sec-body { display: none; }
+
+  h3 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 18px;
+    margin: 34px 0 12px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  h3::before { content: "—"; color: var(--sabi); margin-right: 10px; }
+
+  p { margin: 0 0 14px; }
+  a { color: var(--sabi); }
+
+  ol, ul { margin: 0 0 18px; padding-left: 1.4em; }
+  ol li, ul li { margin: 0 0 8px; }
+  ol { counter-reset: step; list-style: none; padding-left: 0; }
+  ol > li {
+    position: relative;
+    padding-left: 42px;
+    margin-bottom: 12px;
+  }
+  ol > li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute; left: 0; top: 1px;
+    width: 26px; height: 26px;
+    background: var(--ink); color: var(--shiro);
+    font-family: var(--serif); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+  }
+
+  code, .kbd {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    background: var(--sand-deep);
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .path {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    background: var(--shiro);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 3px 10px;
+    display: inline-block;
+    color: var(--ink-soft);
+  }
+  .path b { color: var(--sabi); font-weight: 600; }
+
+  /* Callouts */
+  .note, .warn, .tip {
+    border-left: 3px solid var(--kin);
+    background: var(--shiro);
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 14.5px;
+    border-radius: 0 4px 4px 0;
+  }
+  .note { border-color: var(--kin); }
+  .tip  { border-color: #5a7d5a; }
+  .warn { border-color: var(--sabi); background: #fbf3f0; }
+  .note .tag, .warn .tag, .tip .tag {
+    display: inline-block;
+    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 700; margin-right: 10px;
+  }
+  .note .tag { color: var(--kin); }
+  .tip  .tag { color: #5a7d5a; }
+  .warn .tag { color: var(--sabi); }
+
+  table { border-collapse: collapse; width: 100%; margin: 16px 0 22px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--sand); font-weight: 600; font-family: var(--serif); }
+  td code { white-space: normal; }
+
+  /* Toolbar */
+  .toolbar {
+    position: fixed; right: 24px; bottom: 24px;
+    display: flex; flex-direction: column; gap: 10px; z-index: 50;
+  }
+  .toolbar button {
+    border: 1px solid var(--line-strong);
+    background: var(--shiro);
+    color: var(--ink-soft);
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    transition: all .2s ease;
+  }
+  .toolbar button:hover { color: var(--sabi); border-color: var(--sabi); }
+
+  footer.doc-foot {
+    margin-top: 60px; padding-top: 24px; border-top: 2px solid var(--ink);
+    font-size: 12.5px; color: var(--muted);
+  }
+
+  /* Mobile */
+  .menu-toggle { display: none; }
+  @media (max-width: 880px) {
+    .layout { flex-direction: column; }
+    .sidebar {
+      position: static; width: 100%; height: auto; flex: none;
+      border-right: none; border-bottom: 1px solid var(--line);
+    }
+    .content { padding: 32px 22px 90px; }
+    header.doc-head h1 { font-size: 30px; }
+    .sidebar .toc.collapsed-mobile { display: none; }
+    .menu-toggle {
+      display: inline-block; margin-top: 14px; background: none; border: 1px solid var(--line-strong);
+      padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px;
+    }
+  }
+
+  /* Print */
+  @media print {
+    .sidebar, .toolbar, .menu-toggle { display: none !important; }
+    .content { padding: 0; }
+    section.block.collapsed > .sec-body { display: block !important; }
+    section.block > .sec-head .chev { display: none; }
+    body { font-size: 12px; background: #fff; }
+    a { color: var(--ink); }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <p class="brand">ROKUYA</p>
+    <p class="brand-sub">Operation Manual</p>
+    <button class="menu-toggle" aria-label="目次">目次の表示／非表示</button>
+    <nav>
+      <ul class="toc" id="toc">
+        <li><a href="#intro"><span class="num">0</span>はじめに</a></li>
+        <li><a href="#basics"><span class="num">1</span>2つの管理場所と基本用語</a></li>
+        <li><a href="#products"><span class="num">2</span>商品の管理</a></li>
+        <li><a href="#inquire"><span class="num">3</span>「購入」と「お問い合わせ」</a></li>
+        <li><a href="#collections"><span class="num">4</span>コレクションの管理</a></li>
+        <li><a href="#pages"><span class="num">5</span>ページ・文言の編集</a></li>
+        <li><a href="#files"><span class="num">6</span>ファイル（PDF等）の管理</a></li>
+        <li><a href="#menus"><span class="num">7</span>メニュー（ナビ）の編集</a></li>
+        <li><a href="#journal"><span class="num">8</span>Journal（ブログ）</a></li>
+        <li><a href="#lang"><span class="num">9</span>言語・翻訳</a></li>
+        <li><a href="#theme"><span class="num">10</span>テーマの管理と注意点</a></li>
+        <li><a href="#support"><span class="num">11</span>困ったときは</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main class="content">
+    <header class="doc-head">
+      <p class="eyebrow">Japanese craft. Asia's finest tables.</p>
+      <h1>ROKUYA ウェブサイト運用マニュアル</h1>
+      <p class="lead">本マニュアルは、ROKUYA オンラインストアを日々運用していただくための手引きです。商品の追加、コレクションの作成、ページ文言の編集など、よく行う作業を手順に沿ってご案内します。</p>
+      <div class="meta-row">
+        <span>ストアURL：<a href="https://rokuya-jp.com">https://rokuya-jp.com</a></span>
+        <span>管理画面：<a href="https://admin.shopify.com">admin.shopify.com</a></span>
+        <span>テーマ：Prestige（ROKUYA カスタマイズ）</span>
+      </div>
+    </header>
+
+    <!-- 0 -->
+    <section class="block" id="intro">
+      <div class="sec-head"><span class="sec-num">0</span><h2>はじめに</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <p>このマニュアルでは、専門的な知識がなくても運用いただけるよう、画面の場所と操作手順を中心にまとめています。コードの編集は必要ありません。</p>
+        <div class="note"><span class="tag">Point</span>困ったときは、まず「どの場所（管理画面 or テーマエディター）での作業か」を確認すると迷いません。次の章で2つの場所を整理します。</div>
+        <div class="tip"><span class="tag">Tip</span>大きな変更を行う前に、現在のテーマを複製しておくと安心です（→ <a href="#theme">第10章</a>）。</div>
+      </div>
+    </section>
+
+    <!-- 1 -->
+    <section class="block" id="basics">
+      <div class="sec-head"><span class="sec-num">1</span><h2>2つの管理場所と基本用語</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <h3>サイトを管理する2つの場所</h3>
+        <table>
+          <tr><th>場所</th><th>主にできること</th><th>開き方</th></tr>
+          <tr>
+            <td><b>① Shopify 管理画面</b></td>
+            <td>商品・コレクション・ページ・ブログ・ファイル・メニュー・翻訳など「中身（データ）」の管理</td>
+            <td><span class="path">admin.shopify.com</span> にログイン</td>
+          </tr>
+          <tr>
+            <td><b>② テーマエディター</b></td>
+            <td>各ページの「見た目・配置・文言」の編集、セクションの追加・削除・並び替え</td>
+            <td><span class="path">オンラインストア → テーマ → <b>カスタマイズ</b></span></td>
+          </tr>
+        </table>
+
+        <h3>覚えておきたい用語</h3>
+        <table>
+          <tr><th>用語</th><th>意味</th></tr>
+          <tr><td><b>テーマ</b></td><td>サイト全体のデザインの土台。現在は「Prestige」をROKUYA用にカスタマイズしています。</td></tr>
+          <tr><td><b>セクション</b></td><td>ページを構成する横帯のブロック（ヒーロー、テキスト、商品一覧など）。テーマエディターで編集します。</td></tr>
+          <tr><td><b>コレクション</b></td><td>商品をまとめたグループ（例：器種・素材・季節ごと）。</td></tr>
+          <tr><td><b>メタフィールド</b></td><td>商品に追加する特別な情報欄（作家・季節・一点もの 等）。ROKUYA独自の表示に使われます。</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="block" id="products">
+      <div class="sec-head"><span class="sec-num">2</span><h2>商品の管理</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <h3>新しい商品を追加する</h3>
+        <ol>
+          <li>管理画面左の <span class="path">商品管理 → 商品</span> を開き、右上の <b>「商品を追加する」</b> をクリック。</li>
+          <li><b>タイトル</b>（商品名）と<b>説明</b>を入力。</li>
+          <li><b>メディア</b>に商品画像をアップロード（後からの差し替え・追加も可能です）。</li>
+          <li><b>価格</b>を入力。</li>
+          <li>右側の<b>ステータス</b>を、準備中は「下書き」、公開する場合は「アクティブ（販売中）」に設定。</li>
+          <li>下部の<b>メタフィールド</b>欄でROKUYA独自の情報を設定（次項）。</li>
+          <li>右上の<b>「保存」</b>をクリック。</li>
+        </ol>
+
+        <div class="note"><span class="tag">写真が後追いの場合</span>情報を先に登録して公開し、画像は仮（ダミー）または後日差し替え、という運用で問題ありません。画像はいつでも <span class="path">商品 → メディア</span> から追加・差し替えできます。</div>
+
+        <h3>ROKUYA独自の設定（メタフィールド）</h3>
+        <p>商品ページ下部の<b>メタフィールド</b>で、以下を設定すると、サイト上の表示や絞り込みに正しく反映されます。</p>
+        <table>
+          <tr><th>項目</th><th>役割</th><th>設定値の例</th></tr>
+          <tr><td><b>作家（Artist）</b></td><td>商品ページと一覧に作家名を表示</td><td>作家メタオブジェクトを選択</td></tr>
+          <tr><td><b>季節タグ（Season）</b></td><td>季節での絞り込み・表示</td><td>Spring / Summer / Autumn / Winter / Others</td></tr>
+          <tr><td><b>一点もの（Inquire only）</b></td><td>ONにすると購入ボタンが「お問い合わせ」に変化（→<a href="#inquire">第3章</a>）</td><td>オン／オフ</td></tr>
+          <tr><td><b>完売（Sold）</b></td><td>完売表示に切替</td><td>該当時に設定</td></tr>
+          <tr><td><b>産地・技法（Origin / Technique）</b></td><td>商品ページに産地や技法の解説を表示</td><td>テキスト</td></tr>
+        </table>
+
+        <h3>器種・素材の分類</h3>
+        <p>器種（皿・碗など）と素材（陶器・磁器・ガラスなど）は、対応する<b>コレクション</b>に商品を含めることで分類されます（→ <a href="#collections">第4章</a>）。</p>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="block" id="inquire">
+      <div class="sec-head"><span class="sec-num">3</span><h2>「購入」と「お問い合わせ」の出し分け</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <p>ROKUYAでは、商品によってボタンの表示が自動で切り替わります。</p>
+        <table>
+          <tr><th>商品の状態</th><th>表示されるボタン</th></tr>
+          <tr><td>通常販売（在庫あり）</td><td><b>カートに追加／購入</b></td></tr>
+          <tr><td>一点もの（メタフィールド「一点もの」がオン）</td><td><b>この器について問い合わせる</b>（お問い合わせページへ誘導）</td></tr>
+          <tr><td>完売（メタフィールド「完売」を設定）</td><td><b>Sold / 完売</b> 表示 ＋ お問い合わせ</td></tr>
+        </table>
+        <div class="note"><span class="tag">設定方法</span>一点もの・受注品として扱いたい商品は、商品ページの<b>メタフィールド「一点もの（Inquire only）」をオン</b>にするだけです。これで購入ボタンが自動的にお問い合わせ導線へ切り替わります。</div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="block" id="collections">
+      <div class="sec-head"><span class="sec-num">4</span><h2>コレクションの管理</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <h3>新しいコレクションを作成する</h3>
+        <ol>
+          <li><span class="path">商品管理 → コレクション</span> を開き、<b>「コレクションを作成する」</b>をクリック。</li>
+          <li><b>タイトル</b>と<b>説明</b>を入力。</li>
+          <li><b>コレクションの種類</b>を選択：
+            <ul>
+              <li><b>手動</b>…商品を一つずつ追加する</li>
+              <li><b>自動</b>…条件（タグ・季節 等）に一致する商品を自動で含める</li>
+            </ul>
+          </li>
+          <li>画像（任意）を設定し、<b>「保存」</b>。</li>
+          <li>必要に応じて、メニューに追加して表示します（→ <a href="#menus">第7章</a>）。</li>
+        </ol>
+        <div class="tip"><span class="tag">Tip</span>季節コレクションは、商品の<b>季節タグ</b>を条件にした<b>自動コレクション</b>にすると、新商品を追加するだけで自動的に反映され、運用が楽になります。</div>
+        <div class="note"><span class="tag">3軸の考え方</span>ROKUYAのコレクションは「器種」「素材」「季節」の3軸で整理されています。新規追加時も、この3軸のどこに位置づくかを意識すると、サイト内の絞り込みと一貫します。</div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="block" id="pages">
+      <div class="sec-head"><span class="sec-num">5</span><h2>ページ・文言の編集（テーマエディター）</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <h3>テーマエディターの開き方</h3>
+        <ol>
+          <li><span class="path">オンラインストア → テーマ</span> を開く。</li>
+          <li>公開中テーマの<b>「カスタマイズ」</b>をクリック。</li>
+          <li>上部中央のメニューから、編集したいページ（トップ、各ページ）を選択。</li>
+        </ol>
+
+        <h3>文言（テキスト）を編集する</h3>
+        <ol>
+          <li>左側の一覧、または画面上で編集したい<b>セクション</b>をクリック。</li>
+          <li>右側の設定欄でテキストを書き換える。</li>
+          <li>右上の<b>「保存」</b>をクリック。</li>
+        </ol>
+
+        <h3>セクションの追加・削除・並び替え</h3>
+        <ul>
+          <li><b>追加</b>：左側の<b>「セクションを追加」</b>から、「ROKUYA」カテゴリーのセクションを選べます。</li>
+          <li><b>削除</b>：セクションを選び、設定欄下部の<b>「セクションを削除」</b>。</li>
+          <li><b>並び替え</b>：左側一覧でドラッグして順序を変更。</li>
+          <li><b>非表示</b>：目のアイコンで、削除せず一時的に非表示にできます。</li>
+        </ul>
+
+        <h3>例：免責事項ページを編集する</h3>
+        <p>「輸出入に関する免責事項」ページは、テーマエディターで本文を自由に編集できます。</p>
+        <ol>
+          <li>テーマエディター上部のメニューで、該当ページを選択。</li>
+          <li><b>テキストブロック</b>のセクションをクリック。</li>
+          <li><b>本文（Body）</b>欄で、文章の追記・削除・太字・箇条書き・リンクを編集。</li>
+          <li><b>「保存」</b>。</li>
+        </ol>
+        <div class="warn"><span class="tag">注意</span>免責事項などの法的な文章は、内容を必ず自社でご確認のうえ運用してください。デザイン枠は用意済みですが、文面の最終責任は運営者にあります。</div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="block" id="files">
+      <div class="sec-head"><span class="sec-num">6</span><h2>ファイル（PDF等）の管理</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <p>Service Guide などのPDFは、ShopifyにアップロードしてURLを取得し、ボタンに設定します。</p>
+        <h3>PDFをアップロードしてURLを取得</h3>
+        <ol>
+          <li>管理画面左の <span class="path">コンテンツ（Content） → ファイル（Files）</span> を開く。<br>（見当たらない場合は、上部の検索で「ファイル」と検索）</li>
+          <li><b>「ファイルをアップロード」</b>からPDFを選択。</li>
+          <li>アップロード後、ファイル横の<b>リンクコピー</b>アイコンでURLをコピー。</li>
+        </ol>
+        <h3>Service Guide のリンクを差し替える</h3>
+        <ol>
+          <li>テーマエディターで For Professionals ページを開く。</li>
+          <li><b>Resource（Service Guide）</b>セクションをクリック。</li>
+          <li><b>PDF link</b> 欄に、コピーしたURLを貼り付けて<b>「保存」</b>。</li>
+        </ol>
+        <div class="note"><span class="tag">Point</span>ダウンロードボタンは、Shopifyにアップしたファイルが<b>そのままダウンロード</b>される仕様です。Google Drive等のリンクは別タブで開くだけになる場合があるため、<b>Content → Files</b> のURLをご利用ください。</div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="block" id="menus">
+      <div class="sec-head"><span class="sec-num">7</span><h2>メニュー（ナビゲーション）の編集</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <p>ヘッダーやフッターのリンク（メニュー）は、次の場所で編集します。</p>
+        <ol>
+          <li><span class="path">コンテンツ（Content） → メニュー（Menus）</span> を開く。</li>
+          <li>編集したいメニュー（例：メインメニュー、フッター）を選択。</li>
+          <li><b>「メニュー項目を追加」</b>でリンクを追加（ページ・コレクション・URLなどを指定）。</li>
+          <li>ドラッグで並び替え、<b>「保存」</b>。</li>
+        </ol>
+        <div class="tip"><span class="tag">Tip</span>新しいページやコレクション（例：免責事項、新コレクション）を作成したら、ここでメニューに追加すると、来訪者がたどり着けるようになります。</div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="block" id="journal">
+      <div class="sec-head"><span class="sec-num">8</span><h2>Journal（ブログ）の管理</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <h3>記事を追加する</h3>
+        <ol>
+          <li><span class="path">コンテンツ（Content） → ブログ記事（Blog posts）</span> を開く。</li>
+          <li><b>「ブログ記事を作成」</b>をクリック。</li>
+          <li>タイトル・本文・アイキャッチ画像を入力。</li>
+          <li>右側で<b>ブログ（Journal）</b>を選択し、<b>表示状態</b>を「公開」または日時指定。</li>
+          <li><b>「保存」</b>。</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="block" id="lang">
+      <div class="sec-head"><span class="sec-num">9</span><h2>言語・翻訳</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <p>現在、英語・日本語に対応しています。商品やページの翻訳は、Shopifyの<b>Translate &amp; Adapt</b>アプリで管理します。</p>
+        <ol>
+          <li>管理画面左の <span class="path">アプリ → Translate &amp; Adapt</span> を開く。</li>
+          <li>翻訳対象（商品・コレクション・ページ・テーマ など）を選択。</li>
+          <li>各言語の欄に翻訳を入力（自動翻訳の下書き → 手直し、も可能）。</li>
+          <li><b>「保存」</b>。</li>
+        </ol>
+        <div class="note"><span class="tag">タイ語について</span>タイ語対応は、対応範囲・優先度をご相談のうえ、今後追加していく予定です。追加時も同じ Translate &amp; Adapt 上で管理します。</div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="block" id="theme">
+      <div class="sec-head"><span class="sec-num">10</span><h2>テーマの管理と注意点</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <h3>変更前にバックアップ（テーマの複製）</h3>
+        <ol>
+          <li><span class="path">オンラインストア → テーマ</span> を開く。</li>
+          <li>公開中テーマの「…」メニューから<b>「複製」</b>を選択。</li>
+          <li>複製ができたら、本体の編集を行う。問題があれば複製から戻せます。</li>
+        </ol>
+        <div class="warn"><span class="tag">やらないこと</span>
+          <ul style="margin:8px 0 0;">
+            <li>コードエディター（テーマのコード編集）で <code>rokuya-</code> で始まるセクションを削除・改変しない。</li>
+            <li>公開中テーマで大きな実験をしない（必ず複製で試す）。</li>
+            <li>独自ドメインのDNS設定（Cloudflare）は、接続済みのため基本的に変更しない。</li>
+          </ul>
+        </div>
+        <h3>公開／非公開</h3>
+        <p>準備中のテーマは「非公開」のまま編集し、完成後に<b>「公開」</b>で切り替えます。商品単位では、ステータスを「下書き／アクティブ」で切り替えます。</p>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="block" id="support">
+      <div class="sec-head"><span class="sec-num">11</span><h2>困ったときは</h2><span class="chev">▾</span></div>
+      <div class="sec-body">
+        <p>操作で不明な点や、表示の不具合がございましたら、状況（どのページ・どの操作か）と画面のスクリーンショットを添えてご連絡ください。迅速に確認・対応いたします。</p>
+        <ul>
+          <li>サイト：<a href="https://rokuya-jp.com">https://rokuya-jp.com</a></li>
+          <li>お問い合わせ：<a href="mailto:official@rokuya-jp.com">official@rokuya-jp.com</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="doc-foot">
+      ROKUYA ウェブサイト運用マニュアル ／ Prestige テーマ（ROKUYAカスタマイズ）向け<br>
+      本マニュアルの内容は、Shopifyの仕様変更により画面名称・場所が変わる場合があります。
+    </footer>
+  </main>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <button id="btn-print" title="印刷／PDF保存">🖶</button>
+  <button id="btn-top" title="ページ上部へ">↑</button>
+</div>
+
+<script>
+(function () {
+  // ----- Collapsible sections -----
+  document.querySelectorAll('section.block > .sec-head').forEach(function (head) {
+    head.addEventListener('click', function () {
+      head.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // ----- Smooth-scroll + close mobile menu on click -----
+  var toc = document.getElementById('toc');
+  toc.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      // make sure target section is expanded before scrolling
+      var id = a.getAttribute('href').slice(1);
+      var target = document.getElementById(id);
+      if (target) target.classList.remove('collapsed');
+      if (window.innerWidth <= 880) toc.classList.add('collapsed-mobile');
+    });
+  });
+
+  // ----- Scrollspy: highlight active TOC item -----
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var sections = links.map(function (l) { return document.getElementById(l.getAttribute('href').slice(1)); });
+  function onScroll() {
+    var pos = window.scrollY + 120;
+    var current = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i] && sections[i].offsetTop <= pos) current = sections[i];
+    }
+    links.forEach(function (l) {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + current.id);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ----- Mobile menu toggle -----
+  var mt = document.querySelector('.menu-toggle');
+  if (mt) mt.addEventListener('click', function () { toc.classList.toggle('collapsed-mobile'); });
+
+  // ----- Toolbar -----
+  document.getElementById('btn-top').addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.getElementById('btn-print').addEventListener('click', function () {
+    // expand all before printing
+    document.querySelectorAll('section.block').forEach(function (s) { s.classList.remove('collapsed'); });
+    window.print();
+  });
+})();
+</script>
+</body>
+</html>
